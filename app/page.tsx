@@ -3,7 +3,6 @@
 import { Boxes } from "./component/aceternity-ui/background-boxes";
 import { Header } from "./component/Header";
 import Hero from "./component/Hero";
-import Stats from "./component/Stats";
 import Services from "./component/Services";
 import About from "./component/About";
 import Footer from "./component/Footer";
@@ -11,15 +10,21 @@ import Contact from "./component/Contact";
 
 export default function Home() {
   return (
-    <main className="min-h-screen relative overflow-hidden">
-      <Boxes className="absolute inset-0 z-0" />
-      <Header />
-      <div className="z-10 w-full">
+    <main className="min-h-screen relative overflow-y-auto">
+      <div className="relative">
+        <Header />
+        <div className="relative sm:mt-60 lg:pt-30" />
+        <Boxes className="absolute z-10" />
         <Hero />
-        <Stats />
-        <Services />
-        <About />
-        <Contact />
+        <div className="relative sm:pt-80 lg:pt-10">
+          <Services />
+        </div>
+        <div className="relative">
+          <About />
+        </div>
+        <div className="relative">
+          <Contact />
+        </div>
         <Footer />
       </div>
     </main>
