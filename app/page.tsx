@@ -10,13 +10,13 @@ import Contact from "./component/Contact";
 
 export default function Home() {
   return (
-    <main className="min-h-screen relative overflow-y-auto">
+    <main className="min-h-screen relative overflow-hidden">
       <div className="relative">
         <Header />
         <div className="relative sm:mt-60 lg:pt-30" />
         <Boxes className="absolute z-10" />
         <Hero />
-        <div className="relative sm:pt-80 lg:pt-10">
+        {/* <div className="relative sm:pt-80 lg:pt-10">
           <Services />
         </div>
         <div className="relative">
@@ -24,7 +24,7 @@ export default function Home() {
         </div>
         <div className="relative">
           <Contact />
-        </div>
+        </div> */}
         <Footer />
       </div>
     </main>

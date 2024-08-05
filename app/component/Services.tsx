@@ -1,6 +1,8 @@
-import { useRef, useEffect } from "react";
-import { useFrame, Canvas, useThree } from "@react-three/fiber";
-import { OrbitControls, useScroll } from "@react-three/drei";
+"use client";
+
+import { useRef, useEffect, useState } from "react";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 
 const services = [
@@ -12,53 +14,24 @@ const services = [
     title: "Tokenization Services",
     description: "Creating and managing digital assets on the blockchain.",
   },
-  // ... add more services as needed
+  {
+    title: "Smart Contract Development",
+    description: "Designing and implementing secure smart contracts.",
+  },
+  // Add more services as needed
 ];
 
 function BlockchainBlock() {
   const meshRef = useRef<THREE.Mesh>(null);
-  const scroll = useScroll();
-  const { viewport } = useThree();
-
-  useFrame((state, delta) => {
-    if (meshRef.current) {
-      // Calculate target rotation based on scroll
-      const targetRotation = scroll?.offset * Math.PI * 2;
-
-      // Interpolate current rotation towards target rotation
-      meshRef.current.rotation.y +=
-        (targetRotation - meshRef.current.rotation.y) * 0.1;
-
-      // Optional: add some gentle floating motion
-      meshRef.current.position.y = Math.sin(state.clock.elapsedTime) * 0.1;
-    }
-  });
-
-  return (
-    <mesh ref={meshRef}>
-      <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial color="cyan" />
-    </mesh>
-  );
-}
-
-export default function Services() {
-  const servicesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (servicesRef.current) {
-        const scrollPosition = window.scrollY;
-        const serviceItems =
-          servicesRef.current.querySelectorAll(".service-item");
-        serviceItems.forEach((item, index) => {
-          const itemTop = item.getBoundingClientRect().top + scrollPosition;
-          if (scrollPosition > itemTop - window.innerHeight / 2) {
-            item.classList.add("active");
-          } else {
-            item.classList.remove("active");
-          }
-        });
+      if (meshRef.current) {
+        const scrollProgress =
+          window.scrollY /
+          (document.documentElement.scrollHeight - window.innerHeight);
+        const rotation = scrollProgress * Math.PI * 2;
+        meshRef.current.rotation.y = rotation;
       }
     };
 
@@ -67,31 +40,66 @@ export default function Services() {
   }, []);
 
   return (
-    <section
-      ref={servicesRef}
-      className="py-20 px-4 md:px-8 bg-black text-white"
-    >
-      <h2 className="text-5xl font-bold mb-12 text-center">Our Services</h2>
-      <div className="max-w-7xl mx-auto">
+    <mesh ref={meshRef}>
+      <boxGeometry args={[1, 1, 1]} />
+      <meshStandardMaterial color="#00ff00" />
+    </mesh>
+  );
+}
+
+export default function Services() {
+  const [visibleIndex, setVisibleIndex] = useState(0);
+  const servicesRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const options = {
+      root: null,
+      rootMargin: "0px",
+      threshold: 0.5,
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const index = parseInt(
+            entry.target.getAttribute("data-index") || "0",
+            10
+          );
+          setVisibleIndex(index);
+        }
+      });
+    }, options);
+
+    const serviceItems = document.querySelectorAll(".service-item");
+    serviceItems.forEach((item) => observer.observe(item));
+
+    return () => {
+      serviceItems.forEach((item) => observer.unobserve(item));
+    };
+  }, []);
+
+  return (
+    <section className="bg-black text-white flex">
+      <div className="w-1/2 h-screen sticky top-0 left-0">
+        <Canvas camera={{ position: [0, 0, 5] }}>
+          <ambientLight intensity={0.5} />
+          <pointLight position={[10, 10, 10]} />
+          <BlockchainBlock />
+          <OrbitControls enableZoom={false} />
+        </Canvas>
+      </div>
+      <div ref={servicesRef} className="w-1/2 px-4 sm:px-6 lg:px-8 py-20">
+        <h2 className="text-5xl font-bold mb-12 text-center">Our Services</h2>
         {services.map((service, index) => (
           <div
             key={index}
-            className="service-item mb-20 opacity-0 transition-opacity duration-500"
+            data-index={index}
+            className={`service-item mb-20 transition-opacity duration-500 ${
+              index === visibleIndex ? "opacity-100" : "opacity-0"
+            }`}
           >
-            <div className="flex flex-col md:flex-row items-center">
-              <div className="md:w-1/2 mb-8 md:mb-0">
-                <h3 className="text-3xl font-bold mb-4">{service.title}</h3>
-                <p className="text-xl">{service.description}</p>
-              </div>
-              <div className="md:w-1/2 h-[300px]">
-                <Canvas camera={{ position: [0, 0, 5] }}>
-                  <ambientLight intensity={0.5} />
-                  <pointLight position={[10, 10, 10]} />
-                  <BlockchainBlock />
-                  <OrbitControls enableZoom={false} />
-                </Canvas>
-              </div>
-            </div>
+            <h3 className="text-3xl font-bold mb-4">{service.title}</h3>
+            <p className="text-xl">{service.description}</p>
           </div>
         ))}
       </div>
